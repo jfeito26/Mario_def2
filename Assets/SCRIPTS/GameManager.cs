@@ -1,17 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-public enum InterfaceVariable {TIME, COINS }
-public class AudioManager : MonoBehaviour
+public enum InterfaceVariable { TIME, COINS }
+public class GameManager : MonoBehaviour
 {
-    public static AudioManager instance;
-    private List<AudioSource> sounds;//allActiveSounds
-    //public AudioClip NombreAudio;
-    //GameManager.instance.PlayAudio(NombreAudio, "NombreAudio", true(si queremos que sea loop));
     private float currentGameTime = 0.0f;
     private int coins = 0;
+    public TextMeshProUGUI timeText;
+    public TextMeshProUGUI coinsText;
+    public static GameManager instance;
+    // Start is called before the first frame update
+
     private void Awake()
     {
         if (!instance)
@@ -24,53 +25,18 @@ public class AudioManager : MonoBehaviour
             Destroy(gameObject);//si ya hay manager destruir
         }
     }
-    // Start is called before the first frame update
+
     void Start()
     {
-        sounds = new List<AudioSource>();
+        UpdateText();
     }
 
-    public AudioSource PlayAudio(AudioClip clip, string gameObjectName, bool isloop = false, float volume = 1)
+    // Update is called once per frame
+    void Update()
     {
-        //1- Create empty
-        GameObject nObj = new GameObject();
-        //2- ponerle nombre
-        nObj.name = gameObjectName;
-        //3-Añadir el AudioSorce
-        AudioSource audioSourceComponent = nObj.AddComponent<AudioSource>();
-        //4-Arrastrar audioClip
-        audioSourceComponent.clip = clip;
-        //5-seteamos el loop
-        audioSourceComponent.loop = isloop;
-        //6-regular propiedades...
-        audioSourceComponent.volume = volume;
-        //7-añadimos objeto a la lista
-        sounds.Add(audioSourceComponent);
-        //8-que retumbe
-        audioSourceComponent.Play();
-        //9-Cuando deje de sonar se destruye(performance(rendimiento))
-        StartCoroutine(WaitForAudio(audioSourceComponent));
-
-        return audioSourceComponent;
-    }
-
-    private IEnumerator WaitForAudio(AudioSource source)
-    {
-        if(source.loop)
-        {
-            yield return null;
-        }
-        else
-        {
-            //esperamos mientras el audio este sonando
-            while (source.isPlaying)
-            {
-                yield return new WaitForSeconds(0.3f);
-            }
-
-            //cuando el audio deja de sonar lo destruimos
-            Destroy(source.gameObject);
-        }
+        currentGameTime += Time.deltaTime;
+        UpdateInterface(InterfaceVariable.COINS);
+        UpdateText();
     }
 
     public void StartPlaying()
@@ -92,20 +58,45 @@ public class AudioManager : MonoBehaviour
     public void PlusCoin(int value)
     {
         coins += value;
+        UpdateInterface(InterfaceVariable.COINS);
+        UpdateText();
     }
 
     public float ValueCoins()
     {
         return coins;
     }
-    // Update is called once per frame
-    void Update()
+    private void UpdateText()
     {
-        
+
+        if (timeText != null)
+        {
+            timeText.text = "Tiempo: " + currentGameTime.ToString("F2"); // "F2" para 2 decimales.
+        }
+
+        if (coinsText != null)
+        {
+            coinsText.text = "Monedas: " + coins.ToString();
+        }
     }
 
-    //switch (variableUpdate) {
-    //    case InterfaceVariable.COINS:
-    //    textComponent.text = "Puntos: " + AudioManager.instance.GetCoins();
-    //    break; F2(2 decimales)
+    public void UpdateInterface(InterfaceVariable variableUpdate)
+    {
+        switch (variableUpdate)
+        {
+            case InterfaceVariable.TIME:
+                if (timeText != null)
+                {
+                    timeText.text = "Tiempo: " + currentGameTime.ToString("F2");
+                }
+                break;
+            case InterfaceVariable.COINS:
+                if (coinsText != null)
+                {
+                    coinsText.text = "Monedas: " + coins.ToString();
+                }
+                break;
+        }
+    }
+
 }

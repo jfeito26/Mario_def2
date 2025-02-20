@@ -11,6 +11,7 @@ public class PLAYERMOVEMENT : MonoBehaviour
     private Vector2 _dir;
     private PlayerState _currentState;
     private bool Jumping = false;
+
     public LayerMask groundMask;
     public AudioClip jumpingClip;
     public float JumpForce = 4f, sphereRadius = 1f;
